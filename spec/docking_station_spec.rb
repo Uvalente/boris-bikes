@@ -25,8 +25,25 @@ end
   it { is_expected.to respond_to :release_bike }
 
   it 'raises error on .release_bike when docking station is empty' do
-    expect { subject.release_bike } .to raise_error("No bikes available")
+    expect { subject.release_bike } .to raise_error("No working bikes available")
   end
+
+  it "Does release a working bike when there is a broken bike" do
+    bike = Bike.new
+    bike.report_broken
+    subject.dock(bike)
+    bike2 = Bike.new
+    subject.dock(bike2)
+    expect(subject.release_bike).to eq bike2
+  end
+
+  it "fails if all bikes in a station are broken" do
+    bike = Bike.new
+    bike.report_broken
+    10.times{subject.dock(bike)}
+    expect{subject.release_bike} .to raise_error("No working bikes available")
+  end
+
 
   it 'releases working bikes' do
     bike = Bike.new
