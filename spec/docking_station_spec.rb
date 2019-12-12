@@ -1,6 +1,7 @@
 require 'docking_station'
 
 describe DockingStation do
+  let(:bike) { double(:report_broken => false, :working? => false) }
 
     # other tests omitted for brevity
 describe "initialise works" do
@@ -17,7 +18,6 @@ end
 
   it "Fails when docking 31st bike when starts with 30 bikes in docking station" do
     docking_station = DockingStation.new(30)
-    bike = Bike.new
     docking_station.capacity.times { docking_station.dock(bike) }
     expect{docking_station.dock(bike)}.to raise_error("Dock is full")
   end
@@ -29,16 +29,15 @@ end
   end
 
   it "Does release a working bike when there is a broken bike" do
-    bike = Bike.new
     bike.report_broken
     subject.dock(bike)
-    bike2 = Bike.new
+    bike2 = double(:bike)
+    allow(bike2).to receive(:working?).and_return(true)
     subject.dock(bike2)
     expect(subject.release_bike).to eq bike2
   end
 
   it "fails if all bikes in a station are broken" do
-    bike = Bike.new
     bike.report_broken
     10.times{subject.dock(bike)}
     expect{subject.release_bike} .to raise_error("No working bikes available")
@@ -46,19 +45,17 @@ end
 
 
   it 'releases working bikes' do
-    bike = Bike.new
+    allow(bike).to receive(:working?).and_return(true)
     subject.dock(bike)
     expect(subject.release_bike).to eq bike
   end
 
   it 'dock second bike' do
-    bike = Bike.new
     subject.dock(bike)
     expect(subject.dock(bike)).to eq [bike, bike]
   end
 
   it 'docks something' do
-    bike = Bike.new
     subject.dock(bike)
     expect(subject.bikes).to eq [bike]
   end
