@@ -1,26 +1,34 @@
+# frozen_string_literal: true
+
 require_relative 'bike'
 
 class DockingStation
   attr_accessor :capacity
   attr_reader :bikes
 
-  DEFAULT_CAPACITY=20
+  DEFAULT_CAPACITY = 20
 
-
-  def initialize(capacity=DEFAULT_CAPACITY)
+  def initialize(capacity = DEFAULT_CAPACITY)
     @bikes = []
     @capacity = capacity
   end
 
   def release_bike
+    raise 'No working bikes available' if empty?
 
-    fail "No working bikes available" if empty?
-      select_working.pop
+    select_working.pop
   end
 
   def dock(bike)
-    fail "Dock is full" if full?
-      @bikes << bike
+    raise 'Dock is full' if full?
+
+    @bikes << bike
+  end
+
+  def load_broken_bikes
+    broken_array = select_broken
+    @bikes -= select_broken
+    broken_array
   end
 
   private
@@ -34,7 +42,10 @@ class DockingStation
   end
 
   def select_working
-    @bikes.select{|bike| bike.working?}
+    @bikes.select(&:working?)
   end
 
+  def select_broken
+    @bikes.reject(&:working?)
+  end
 end
